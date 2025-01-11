@@ -3,34 +3,48 @@ console.log("***Series Tracker installed.");
 let seriesXPathGlobal = null;
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "extractData") {
-        console.log("Awaiting for episode element...");
-        seriesXPathGlobal = request.seriesXPath; // Зберегти seriesXPath у глобальну змінну
-        waitForElement(request.episodeXPath, 10000) // Чекаємо до 10 секунд
-            .then((episodeElement) => {
-                console.log("Episode element found:", episodeElement);
-                observeElement(episodeElement, request.seriesXPath, request.urlPattern);
-                // Початкова перевірка значення епізоду
-                checkAndSaveEpisode(episodeElement, request.seriesXPath, request.urlPattern);
-            })
-            .catch(() => {
-                console.error("Episode element not found within the time limit.");
-            });
-    } else if (request.action === "getSeriesTitle") {
-        if (seriesXPathGlobal) {
-            const seriesTitle = document.evaluate(
-                seriesXPathGlobal,
-                document,
-                null,
-                XPathResult.STRING_TYPE,
-                null
-            ).stringValue;
-            sendResponse({ seriesTitle });
-        } else {
-            sendResponse({ seriesTitle: null });
-        }
+    switch (request.action) {
+        case "extractData":
+            handleExtractData(request);
+            break;
+        case "getSeriesTitle":
+            handleGetSeriesTitle(sendResponse);
+            break;
+        default:
+            console.warn("Unknown action:", request.action);
     }
+    return true; // Вказуємо, що відповідь буде асинхронною
 });
+
+function handleExtractData(request) {
+    console.log("Awaiting for episode element...");
+    seriesXPathGlobal = request.seriesXPath; // Зберегти seriesXPath у глобальну змінну
+    waitForElement(request.episodeXPath, 10000) // Чекаємо до 10 секунд
+        .then((episodeElement) => {
+            console.log("Episode element found:", episodeElement);
+            observeElement(episodeElement, request.seriesXPath, request.urlPattern);
+            // Початкова перевірка значення епізоду
+            checkAndSaveEpisode(episodeElement, request.seriesXPath, request.urlPattern);
+        })
+        .catch(() => {
+            console.error("Episode element not found within the time limit.");
+        });
+}
+
+function handleGetSeriesTitle(sendResponse) {
+    if (seriesXPathGlobal) {
+        const seriesTitle = document.evaluate(
+            seriesXPathGlobal,
+            document,
+            null,
+            XPathResult.STRING_TYPE,
+            null
+        ).stringValue;
+        sendResponse({ seriesTitle });
+    } else {
+        sendResponse({ seriesTitle: null });
+    }
+}
 
 // Функція для очікування появи елемента
 function waitForElement(xpath, timeout = 10000, interval = 100) {

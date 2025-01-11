@@ -12,17 +12,15 @@
     <input id="url-pattern" type="text" placeholder="https://example.com/*" />
   </label>
   <label>
+    <input id="dynamic-checkbox" type="checkbox" /> Dynamic
+  </label>
+  <label>
     Series XPath:
     <input id="series-xpath" type="text" placeholder="//div[@class='series-title']" />
   </label>
-  
   <label id="episode-xpath-label">
     Episode XPath:
-    <div class="input-with-checkbox">
-        <input id="dynamic-checkbox" type="checkbox" />Dynamic
-    </div>
     <input id="episode-xpath" type="text" placeholder="//span[@class='episode-number']" />
-    
   </label>
   <div id="dynamic-fields" style="display: none;">
     <label>
@@ -37,10 +35,7 @@
   <button id="save-settings">Save</button>
 
   <h2>Current Settings</h2>
-  <div id="settings-container">
-    <ul id="settings-list"></ul>
-    <ul id="local-data-list"></ul>
-  </div>
+  <div id="settings-container"></div>
 
   <script src="options.js"></script>
 </body>

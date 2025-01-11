@@ -4,23 +4,13 @@ body {
     background-color: #f9f9f9;
 }
 
-h1 {
+h1, h2 {
     color: #333;
 }
 
 label {
     display: block;
     margin-bottom: 10px;
-}
-
-.input-with-checkbox {
-    display: flex;
-    align-items: center;
-    /* margin-bottom: 15px; */
-}
-
-#dynamic-checkbox {
-    /* margin-bottom: 15px; */
 }
 
 input[type="text"] {
@@ -45,41 +35,31 @@ button:hover {
     background-color: #45a049;
 }
 
-h2 {
-    margin-top: 30px;
-    color: #333;
-}
-
 #settings-container {
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
 }
 
-#settings-list, #local-data-list {
-    width: 48%;
-    list-style-type: none;
-    padding: 0;
-}
-
-#settings-list li, #local-data-list li {
+.card {
     background-color: #fff;
-    margin-bottom: 10px;
-    padding: 10px;
     border: 1px solid #ccc;
-    border-radius: 4px;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: calc(25% - 30px); /* Три картки в рядку */
+    box-sizing: border-box;
+    margin: 10px 0; /* Відступ між картками */
 }
 
-#local-data-list {
-    max-height: 400px; /* Максимальна висота для скролу */
-    overflow-y: auto;
+.card h3 {
+    margin-top: 0;
 }
 
-.alert {
-    color: red;
-    font-weight: bold;
+.card p {
+    margin: 5px 0;
 }
 
-#settings-list p {
-    color: #666;
-    font-style: italic;
+.card button {
+    margin-top: 10px;
 }

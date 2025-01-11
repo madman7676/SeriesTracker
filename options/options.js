@@ -1,6 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const settingsList = document.getElementById("settings-list");
-    const localDataList = document.getElementById("local-data-list");
+    const settingsContainer = document.getElementById("settings-container");
     const urlPatternInput = document.getElementById("url-pattern");
     const seriesXPathInput = document.getElementById("series-xpath");
     const episodeXPathInput = document.getElementById("episode-xpath");
@@ -12,15 +11,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Показати або приховати динамічні поля
     dynamicCheckbox.addEventListener("change", () => {
-        if (dynamicCheckbox.checked) {
-            episodeXPathInput.style.display = "none";
-            episodeXPathLabel.style.display = "none";
-            dynamicFields.style.display = "block";
-        } else {
-            episodeXPathInput.style.display = "block";
-            episodeXPathLabel.style.display = "block";
-            dynamicFields.style.display = "none";
-        }
+        const isChecked = dynamicCheckbox.checked;
+        episodeXPathInput.style.display = isChecked ? "none" : "block";
+        episodeXPathLabel.style.display = isChecked ? "none" : "block";
+        dynamicFields.style.display = isChecked ? "block" : "none";
     });
 
     // Завантажити існуючі налаштування
@@ -30,7 +24,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Зберегти нові налаштування
-    document.getElementById("save-settings").addEventListener("click", () => {
+    document.getElementById("save-settings").addEventListener("click", saveSettings);
+
+    function saveSettings() {
         const urlPattern = urlPatternInput.value.trim();
         const seriesXPath = seriesXPathInput.value.trim();
         const episodeXPath = episodeXPathInput.value.trim();
@@ -58,45 +54,48 @@ document.addEventListener("DOMContentLoaded", () => {
             chrome.storage.local.set({ settings }, () => {
                 alert("Settings saved!");
                 displaySettings(settings);
-                // Очищення полів після збереження
-                urlPatternInput.value = "";
-                seriesXPathInput.value = "";
-                episodeXPathInput.value = "";
-                containerXPathInput.value = "";
-                currentEpisodeXPathInput.value = "";
-                dynamicCheckbox.checked = false;
-                dynamicFields.style.display = "none";
-                episodeXPathLabel.style.display = "block";
-                episodeXPathInput.style.display = "block";
+                clearInputs();
             });
         });
-    });
+    }
+
+    function clearInputs() {
+        urlPatternInput.value = "";
+        seriesXPathInput.value = "";
+        episodeXPathInput.value = "";
+        containerXPathInput.value = "";
+        currentEpisodeXPathInput.value = "";
+        dynamicCheckbox.checked = false;
+        dynamicFields.style.display = "none";
+        episodeXPathLabel.style.display = "block";
+        episodeXPathInput.style.display = "block";
+    }
 
     // Відобразити налаштування
     function displaySettings(settings) {
-        settingsList.innerHTML = ""; // Очистити список
-        localDataList.innerHTML = ""; // Очистити список локальних даних
+        settingsContainer.innerHTML = ""; // Очистити список
 
         if (settings.length === 0) {
-            settingsList.innerHTML = `<p>There are no saved settings for the current moment.</p>`;
+            settingsContainer.innerHTML = `<p>There are no saved settings for the current moment.</p>`;
             return;
         }
 
         settings.forEach((setting, index) => {
-            const listItem = document.createElement("li");
-            listItem.innerHTML = `
-                <strong>URL Pattern:</strong> ${setting.urlPattern}<br />
-                <strong>Series XPath:</strong> ${setting.seriesXPath}<br />
+            const card = document.createElement("div");
+            card.className = "card";
+            card.innerHTML = `
+                <h3>URL Pattern: ${setting.urlPattern}</h3>
+                <p><strong>Series XPath:</strong> ${setting.seriesXPath}</p>
                 ${setting.isDynamic ? `
-                    <strong>Container XPath:</strong> ${setting.containerXPath}<br />
-                    <strong>Current episode full XPath:</strong> ${setting.currentEpisodeXPath}<br />
+                    <p><strong>Container XPath:</strong> ${setting.containerXPath}</p>
+                    <p><strong>Current episode full XPath:</strong> ${setting.currentEpisodeXPath}</p>
                 ` : `
-                    <strong>Episode XPath:</strong> ${setting.episodeXPath}<br />
+                    <p><strong>Episode XPath:</strong> ${setting.episodeXPath}</p>
                 `}
                 <button data-index="${index}" class="edit-btn">Edit</button>
                 <button data-index="${index}" class="delete-btn">Delete</button>
             `;
-            settingsList.appendChild(listItem);
+            settingsContainer.appendChild(card);
 
             // Отримати та відобразити локальні дані для кожного збереженого елемента
             chrome.storage.local.get(["urls"], (data) => {
@@ -105,9 +104,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (matchedUrl) {
                     matchedUrl.data.forEach(series => {
-                        const localDataItem = document.createElement("li");
-                        localDataItem.textContent = `${series.name} --- Last watched: ${series.lastEpisode}`;
-                        localDataList.appendChild(localDataItem);
+                        const seriesData = document.createElement("p");
+                        seriesData.textContent = `${series.name} --- Last watched: ${series.lastEpisode}`;
+                        card.appendChild(seriesData);
                     });
                 }
             });

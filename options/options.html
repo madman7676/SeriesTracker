@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="options.css" />
+  <title>Series Tracker Options</title>
+</head>
+<body>
+  <h1>Series Tracker Settings</h1>
+  <label>
+    URL Pattern:
+    <input id="url-pattern" type="text" placeholder="https://example.com/*" />
+  </label>
+  <label>
+    Series XPath:
+    <input id="series-xpath" type="text" placeholder="//div[@class='series-title']" />
+  </label>
+  <label>
+    Episode XPath:
+    <input id="episode-xpath" type="text" placeholder="//span[@class='episode-number']" />
+  </label>
+  <button id="save-settings">Save</button>
+
+  <h2>Current Settings</h2>
+  <div id="settings-container">
+    <ul id="settings-list"></ul>
+    <ul id="local-data-list"></ul>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

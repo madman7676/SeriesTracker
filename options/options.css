@@ -1,0 +1,75 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f9f9f9;
+}
+
+h1 {
+    color: #333;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+h2 {
+    margin-top: 30px;
+    color: #333;
+}
+
+#settings-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+#settings-list, #local-data-list {
+    width: 48%;
+    list-style-type: none;
+    padding: 0;
+}
+
+#settings-list li, #local-data-list li {
+    background-color: #fff;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#local-data-list {
+    max-height: 400px; /* Максимальна висота для скролу */
+    overflow-y: auto;
+}
+
+.alert {
+    color: red;
+    font-weight: bold;
+}
+
+#settings-list p {
+    color: #666;
+    font-style: italic;
+}

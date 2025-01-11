@@ -1,0 +1,38 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+    width: 300px;
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#popup {
+    text-align: center;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    font-size: 22px; /* Збільшений шрифт */
+    color: #333;
+    margin-bottom: 10px;
+}
+
+p {
+    font-size: 16px; /* Збільшений шрифт */
+    color: #666;
+    margin: 0;
+}
+
+#last-episode {
+    font-size: 18px; /* Ще більший шрифт для номера епізоду */
+    color: #000;
+    font-weight: bold; /* Виділення жирним */
+}

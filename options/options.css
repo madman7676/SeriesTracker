@@ -13,6 +13,16 @@ label {
     margin-bottom: 10px;
 }
 
+.input-with-checkbox {
+    display: flex;
+    align-items: center;
+    /* margin-bottom: 15px; */
+}
+
+#dynamic-checkbox {
+    /* margin-bottom: 15px; */
+}
+
 input[type="text"] {
     width: 100%;
     padding: 8px;

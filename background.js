@@ -13,11 +13,12 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
             if (matchedSetting) {
                 console.log("URL matched:", tab.url);
 
-                // Надсилаємо повідомлення content.js з відповідними XPath
+                // Надсилаємо повідомлення content.js з відповідними XPath та URL-патерном
                 chrome.tabs.sendMessage(tabId, {
                     action: "extractData",
                     seriesXPath: matchedSetting.seriesXPath,
                     episodeXPath: matchedSetting.episodeXPath,
+                    urlPattern: matchedSetting.urlPattern
                 });
 
                 // Не очікуємо на відповідь

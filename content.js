@@ -1,20 +1,50 @@
 console.log("***Series Tracker installed.");
 
-chrome.runtime.onMessage.addListener((request, sender) => {
-    if (request.action === "extractData") {
-        console.log("Awaiting for episode element...");
-        waitForElement(request.episodeXPath, 10000) // Чекаємо до 10 секунд
-            .then((episodeElement) => {
-                console.log("Episode element found:", episodeElement);
-                observeElement(episodeElement, request.seriesXPath);
-                // Початкова перевірка значення епізоду
-                checkAndSaveEpisode(episodeElement, request.seriesXPath);
-            })
-            .catch(() => {
-                console.error("Episode element not found within the time limit.");
-            });
+let seriesXPathGlobal = null;
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    switch (request.action) {
+        case "extractData":
+            handleExtractData(request);
+            break;
+        case "getSeriesTitle":
+            handleGetSeriesTitle(sendResponse);
+            break;
+        default:
+            console.warn("Unknown action:", request.action);
     }
+    return true; // Вказуємо, що відповідь буде асинхронною
 });
+
+function handleExtractData(request) {
+    console.log("Awaiting for episode element...");
+    seriesXPathGlobal = request.seriesXPath; // Зберегти seriesXPath у глобальну змінну
+    waitForElement(request.episodeXPath, 10000) // Чекаємо до 10 секунд
+        .then((episodeElement) => {
+            console.log("Episode element found:", episodeElement);
+            observeElement(episodeElement, request.seriesXPath, request.urlPattern);
+            // Початкова перевірка значення епізоду
+            checkAndSaveEpisode(episodeElement, request.seriesXPath, request.urlPattern);
+        })
+        .catch(() => {
+            console.error("Episode element not found within the time limit.");
+        });
+}
+
+function handleGetSeriesTitle(sendResponse) {
+    if (seriesXPathGlobal) {
+        const seriesTitle = document.evaluate(
+            seriesXPathGlobal,
+            document,
+            null,
+            XPathResult.STRING_TYPE,
+            null
+        ).stringValue;
+        sendResponse({ seriesTitle });
+    } else {
+        sendResponse({ seriesTitle: null });
+    }
+}
 
 // Функція для очікування появи елемента
 function waitForElement(xpath, timeout = 10000, interval = 100) {
@@ -44,9 +74,9 @@ function waitForElement(xpath, timeout = 10000, interval = 100) {
 }
 
 // Функція для спостереження за змінами в конкретному елементі
-function observeElement(element, seriesXPath) {
+function observeElement(element, seriesXPath, urlPattern) {
     const observer = new MutationObserver(() => {
-        checkAndSaveEpisode(element, seriesXPath);
+        checkAndSaveEpisode(element, seriesXPath, urlPattern);
     });
 
     // Налаштувати спостереження лише за змінами вмісту або тексту
@@ -63,7 +93,7 @@ function observeElement(element, seriesXPath) {
 }
 
 // Функція для перевірки та збереження значення епізоду
-function checkAndSaveEpisode(element, seriesXPath) {
+function checkAndSaveEpisode(element, seriesXPath, urlPattern) {
     const seriesTitle = document.evaluate(
         seriesXPath,
         document,
@@ -78,14 +108,27 @@ function checkAndSaveEpisode(element, seriesXPath) {
     console.log("Episode number:", episodeNumber);
 
     if (seriesTitle && episodeNumber) {
-        // Отримати збережене значення episodeNumber
-        chrome.storage.local.get(["episodeNumber"], (data) => {
-            const savedEpisodeNumber = parseInt(data.episodeNumber || "0", 10);
+        // Отримати збережені дані
+        chrome.storage.local.get(["urls"], (data) => {
+            const urls = data.urls || [];
+            let urlData = urls.find(url => url.name === urlPattern);
 
-            // Надіслати нове значення лише якщо воно більше за збережене
-            if (episodeNumber > savedEpisodeNumber) {
-                chrome.storage.local.set({ seriesTitle, episodeNumber }, () => {
-                    console.log("Data saved locally:", { seriesTitle, episodeNumber });
+            if (!urlData) {
+                urlData = { name: urlPattern, data: [] };
+                urls.push(urlData);
+            }
+
+            let seriesData = urlData.data.find(series => series.name === seriesTitle);
+
+            if (!seriesData) {
+                seriesData = { name: seriesTitle, lastEpisode: 0 };
+                urlData.data.push(seriesData);
+            }
+
+            if (episodeNumber > seriesData.lastEpisode) {
+                seriesData.lastEpisode = episodeNumber;
+                chrome.storage.local.set({ urls }, () => {
+                    console.log("Data saved locally:", urls);
                 });
             }
         });

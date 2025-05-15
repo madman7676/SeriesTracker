@@ -20,7 +20,15 @@ document.addEventListener("DOMContentLoaded", () => {
     // Завантажити існуючі налаштування
     chrome.storage.local.get(["settings"], (data) => {
         const settings = data.settings || [];
-        displaySettings(settings);
+        // Ensure each setting has a unique ID
+        settings.forEach(setting => {
+            if (!setting.id) {
+                setting.id = generateUniqueId();
+            }
+        });
+        chrome.storage.local.set({ settings }, () => {
+            displaySettings(settings);
+        });
     });
 
     // Зберегти нові налаштування
@@ -40,6 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const newSetting = {
+            id: urlPatternInput.dataset.id || generateUniqueId(),
             urlPattern,
             seriesXPath,
             episodeXPath: isDynamic ? null : episodeXPath,
@@ -50,13 +59,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
         chrome.storage.local.get(["settings"], (data) => {
             const settings = data.settings || [];
-            settings.push(newSetting);
+            const existingIndex = settings.findIndex(setting => setting.id === newSetting.id);
+
+            if (existingIndex !== -1) {
+                settings[existingIndex] = newSetting;
+            } else {
+                settings.push(newSetting);
+            }
+
             chrome.storage.local.set({ settings }, () => {
                 alert("Settings saved!");
                 displaySettings(settings);
                 clearInputs();
             });
         });
+    }
+
+    function generateUniqueId() {
+        return '_' + Math.random().toString(36).substring(2, 9);
     }
 
     function clearInputs() {
@@ -100,7 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Отримати та відобразити локальні дані для кожного збереженого елемента
             chrome.storage.local.get(["urls"], (data) => {
                 const urls = data.urls || [];
-                const matchedUrl = urls.find(url => url.name === setting.urlPattern);
+                const matchedUrl = urls.find(url => url.id === setting.id);
 
                 if (matchedUrl) {
                     matchedUrl.data.forEach(series => {
@@ -133,6 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const setting = settings[index];
         urlPatternInput.value = setting.urlPattern;
         seriesXPathInput.value = setting.seriesXPath;
+        urlPatternInput.dataset.id = setting.id; // Store the ID in a data attribute
         if (setting.isDynamic) {
             dynamicCheckbox.checked = true;
             episodeXPathLabel.style.display = "none";
